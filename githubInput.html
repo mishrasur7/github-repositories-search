@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Front End Development / React</title>
+</head>
+
+<body>
+    <!-- We will put our React component inside this div. -->
+    <div id="root"></div>
+
+    <!-- Load React & Babel -->
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+
+    <!-- Load our React component. -->
+    <script type="text/babel">
+
+        function ShowGithubRepos() {
+            const [key, setKey] = React.useState('');
+
+            const [columnHead, setColumnnHead] = React.useState({
+                name: '',
+                url: ''
+            });
+
+            const [repositories, setRepositories] = React.useState([]);
+
+            const keyChanged = (event) => {
+                setKey(event.target.value)
+            }
+
+            const searchRepos = () => {
+                fetch(`https://api.github.com/search/repositories?q=${key}`)
+                    .then(response => response.json())
+                    .then(responseData => {
+                        if (key === "") {
+                            alert("Please enter keyword")
+                        } else {
+                            setRepositories(responseData.items)
+                            setColumnnHead({ ...columnHead, name: 'Name', url: 'URL' })
+                        }
+                    })
+                    .catch(err => console.error(err))
+            }
+
+            return (
+                <div>
+                <h1>Search repositories based on key words</h1>
+
+                    <input
+                        type="text"
+                        placeholder="Type keyword"
+                        value={key}
+                        onChange={keyChanged} />
+                    <button onClick={searchRepos}>Search</button>
+                    <div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <td><b>{columnHead.name}</b></td>
+                                    <td><b>{columnHead.url}</b></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    repositories.map(repository =>
+                                        <tr key={repository.id}>
+                                            <td>{repository.full_name}</td>
+                                            <td><a href={repository.owner.url}>{repository.owner.url}</a></td>
+                                        </tr>
+                                    )
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+            );
+
+        }
+
+
+
+        ReactDOM.render(<ShowGithubRepos />, document.getElementById("root"));
+
+    </script>
+</body>
+
+</html>
